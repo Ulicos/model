@@ -3,27 +3,34 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
+# Définir votre modèle (remplacez MyModel par votre modèle réel)
+class ECGTransformer(nn.Module):
+    def __init__(self, input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim):
+        super(ECGTransformer, self).__init__()
+        self.linear_in = nn.Linear(input_dim, expanded_dim)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=expanded_dim, nhead=num_heads, dim_feedforward=hidden_dim, batch_first=True)
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
+        self.fc = nn.Linear(expanded_dim, output_dim)
 
-class MyModel(torch.nn.Module):
-    def __init__(self):
-        super(MyModel, self).__init__()
-     
     def forward(self, x):
-        
-        return x
+        x = self.linear_in(x)
+        x = self.transformer_encoder(x)
+        x = x.mean(dim=1)
+        out = self.fc(x)
+        return out
 
 # Charger le modèle
-model_path = 'ecg_transformers_model.pth' 
-model = MyModel()  # Remplacez par la définition de votre modèle
-model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'))) 
+model_path = 'ecg_transformers_model.pth'
+model = ECGTransformer(input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim)
+model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
 
-
+# Fonction de transformation des images
 def transform_image(image):
     transform = transforms.Compose([
-        transforms.Resize((224, 224)), 
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)) 
+        transforms.Normalize((0.5,), (0.5,))
     ])
     return transform(image).unsqueeze(0)
 
