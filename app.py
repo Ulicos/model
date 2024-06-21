@@ -4,7 +4,6 @@ from torch import nn
 from PIL import Image
 from torchvision import transforms
 
-# Définir votre modèle (remplacez MyModel par votre modèle réel)
 class ECGTransformer(nn.Module):
     def __init__(self, input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim):
         super(ECGTransformer, self).__init__()
@@ -22,6 +21,13 @@ class ECGTransformer(nn.Module):
 
 # Charger le modèle
 model_path = 'ecg_transformers_model.pth'
+input_dim = 100  # Remplacez par la bonne valeur
+num_layers = 2   # Remplacez par la bonne valeur
+num_heads = 2    # Remplacez par la bonne valeur
+hidden_dim = 256 # Remplacez par la bonne valeur
+output_dim = 1   # Remplacez par la bonne valeur
+expanded_dim = 8 # Remplacez par la bonne valeur
+
 model = ECGTransformer(input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim)
 model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
