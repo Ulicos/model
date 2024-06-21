@@ -1,17 +1,16 @@
 import streamlit as st
 import torch
-from torch import nn 
 from PIL import Image
 from torchvision import transforms
 
 # Définir votre modèle (remplacez MyModel par votre modèle réel)
-class ECGTransformer(nn.Module):
+class ECGTransformer(torch.nn.Module):
     def __init__(self, input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim):
         super(ECGTransformer, self).__init__()
-        self.linear_in = nn.Linear(input_dim, expanded_dim)
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=expanded_dim, nhead=num_heads, dim_feedforward=hidden_dim, batch_first=True)
-        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
-        self.fc = nn.Linear(expanded_dim, output_dim)
+        self.linear_in = torch.nn.Linear(input_dim, expanded_dim)
+        self.encoder_layer = torch.nn.TransformerEncoderLayer(d_model=expanded_dim, nhead=num_heads, dim_feedforward=hidden_dim, batch_first=True)
+        self.transformer_encoder = torch.nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
+        self.fc = torch.nn.Linear(expanded_dim, output_dim)
 
     def forward(self, x):
         x = self.linear_in(x)
@@ -20,31 +19,29 @@ class ECGTransformer(nn.Module):
         out = self.fc(x)
         return out
 
-# Fonction pour charger le modèle
-def load_model(model_path):
-    model = ECGTransformer(input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim)
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-    model.eval()
-    return model
+# Charger le modèle à partir de GitHub
+model_url = "https://github.com/Ulicos/model/raw/main/ecg_transformers_model.pth"
+input_dim = 224  # Ajustez la dimension d'entrée en fonction de votre modèle
+num_layers = 2  # Ajustez le nombre de couches en fonction de votre modèle
+num_heads = 2  # Ajustez le nombre de têtes en fonction de votre modèle
+hidden_dim = 256  # Ajustez la dimension cachée en fonction de votre modèle
+output_dim = 1  # Ajustez la dimension de sortie en fonction de votre modèle
+expanded_dim = 8  # Ajustez la dimension étendue en fonction de votre modèle
 
-# Chemin vers le modèle
-model_path = 'ecg_transformers_model.pth'
-input_dim = 100  # Remplacez par la bonne valeur
-num_layers = 2   # Remplacez par la bonne valeur
-num_heads = 2    # Remplacez par la bonne valeur
-hidden_dim = 256 # Remplacez par la bonne valeur
-output_dim = 1   # Remplacez par la bonne valeur
-expanded_dim = 8 # Remplacez par la bonne valeur
+# Télécharger le modèle
+model_state_dict = torch.hub.load_state_dict_from_url(model_url, map_location=torch.device('cpu'))
 
-# Charger le modèle
-model = load_model(model_path)
+# Initialiser le modèle avec les paramètres téléchargés
+model = ECGTransformer(input_dim, num_layers, num_heads, hidden_dim, output_dim, expanded_dim)
+model.load_state_dict(model_state_dict)
+model.eval()
 
 # Fonction de transformation des images
 def transform_image(image):
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((224, 224)),  # Ajustez cette taille en fonction des exigences de votre modèle
         transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))
+        transforms.Normalize((0.5,), (0.5,))  # Normalisation basique, ajustez si nécessaire
     ])
     return transform(image).unsqueeze(0)
 
