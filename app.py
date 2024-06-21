@@ -4,7 +4,7 @@ from PIL import Image
 from torchvision import transforms
 
 # Charger le modèle
-model_path = 'C:\Users\BZBook\Downloads\resultssss\ecg_transformers_model.pth' 
+model_path = 'model_checkpoint.pth' 
 model = MyModel()  # Remplacez par la définition de votre modèle
 model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))  
 model.eval()
