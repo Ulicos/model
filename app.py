@@ -3,18 +3,27 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
+
+class MyModel(torch.nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+     
+    def forward(self, x):
+        
+        return x
+
 # Charger le modèle
-model_path = 'model_checkpoint.pth' 
+model_path = 'ecg_transformers_model.pth' 
 model = MyModel()  # Remplacez par la définition de votre modèle
-model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))  
+model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'))) 
 model.eval()
 
-# Fonction de transformation des images
+
 def transform_image(image):
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),  
+        transforms.Resize((224, 224)), 
         transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))  
+        transforms.Normalize((0.5,), (0.5,)) 
     ])
     return transform(image).unsqueeze(0)
 
